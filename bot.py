@@ -42,25 +42,25 @@ class User(StatesGroup):
     score = State()
 
 
-# Обработка POST-запроса с результатами игры
-@app.route('/update_score', methods=['POST'])
-async def update_score():
-    data = request.json
-    try:
-        user_id = data['user_id']
-        score = data['score']
-        user = await get_user_profile(user_id)
-        if user:
-            team_id = user['team_id']
-            await update_user_score(user_id, score)
-            await update_team_score(team_id, score)
-            return jsonify({"success": True}), 200
-        else:
-            return jsonify({"error": "User not found"}), 404
-    except KeyError as e:
-        return jsonify({"error": "Missing key in JSON data"}), 400
-
-
+# # Обработка POST-запроса с результатами игры
+# @app.route('/update_score', methods=['POST'])
+# async def update_score():
+#     data = request.json
+#     try:
+#         user_id = data['user_id']
+#         score = data['score']
+#         user = await get_user_profile(user_id)
+#         if user:
+#             team_id = user['team_id']
+#             await update_user_score(user_id, score)
+#             await update_team_score(team_id, score)
+#             return jsonify({"success": True}), 200
+#         else:
+#             return jsonify({"error": "User not found"}), 404
+#     except KeyError as e:
+#         return jsonify({"error": "Missing key in JSON data"}), 400
+#
+#
 
 def create_game_url(user_id: int = None, team_id: int = None) -> str:
     return f"{GAME_URL}"

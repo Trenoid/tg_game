@@ -11,25 +11,6 @@ engine = create_async_engine(url = config.DATABASE_URL, echo=True)
 async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
-# async def init_db():
-#     import models
-#     async with engine.begin() as conn:
-#         await conn.run_sync(models.Base.metadata.create_all)
-#
-#
-# async def add_user(user_id: int, username: str, first_name: str, last_name: str, team_name: str):
-#     async with async_session() as session:
-#         async with session.begin():
-#
-#             team = await session.execute(select(Team).where(Team.name == team_name))
-#             team = team.scalar_one_or_none()
-#             if not team:
-#                 team = Team(name=team_name)
-#                 session.add(team)
-#             user = User(user_id=user_id, username=username, first_name=first_name, last_name=last_name, team=team)
-#             session.add(user)
-#             await session.commit()
-
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
