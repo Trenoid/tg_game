@@ -6,11 +6,12 @@ from aiogram import Bot, Dispatcher, types,F
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart,Command
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo, InlineKeyboardMarkup, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+
 from aiogram.types import InputFile
 from aiogram.types import InputMediaPhoto
-
 from threading import Thread
 from flask import Flask, request, jsonify
 
@@ -20,7 +21,7 @@ from db import add_user, init_db, create_teams, user_exists, get_user_profile,ge
 
 app = Flask(__name__)
 bot = Bot(token="7489624166:AAGCWo2Q_I0cZ8ME47BopaNnyHOS6GQdQ48")
-dp = Dispatcher()
+dp = Dispatcher(storage=MemoryStorage())
 
 
 # ikb = InlineKeyboardButton("Перейти", web_app=WebAppInfo('https://<your_domain>'))
@@ -42,25 +43,6 @@ class User(StatesGroup):
     score = State()
 
 
-# # Обработка POST-запроса с результатами игры
-# @app.route('/update_score', methods=['POST'])
-# async def update_score():
-#     data = request.json
-#     try:
-#         user_id = data['user_id']
-#         score = data['score']
-#         user = await get_user_profile(user_id)
-#         if user:
-#             team_id = user['team_id']
-#             await update_user_score(user_id, score)
-#             await update_team_score(team_id, score)
-#             return jsonify({"success": True}), 200
-#         else:
-#             return jsonify({"error": "User not found"}), 404
-#     except KeyError as e:
-#         return jsonify({"error": "Missing key in JSON data"}), 400
-#
-#
 
 def create_game_url(user_id: int = None, team_id: int = None) -> str:
     return f"{GAME_URL}"
@@ -82,7 +64,8 @@ def create_main_keyboard():
     builder.add(types.KeyboardButton(text="Мой профиль"))
     builder.add(types.KeyboardButton(text="Рейтинговая таблица"))
     builder.add(types.KeyboardButton(text="Играть"))
-    builder.add(types.KeyboardButton(text = "Игра", web_app=WebAppInfo(url='https://habr.com')))
+    builder.add(types.KeyboardButton(text = "Игра", web_app=WebAppInfo(url='https://www.youtube.com')))
+    # builder.add(types.KeyboardButton(text="Играть", web_app=WebAppInfo(url='http://127.0.0.1:5000')))
     builder.adjust(1)  # Устанавливаем количество кнопок в ряду
     return builder.as_markup(resize_keyboard=True)
 
@@ -178,13 +161,11 @@ async def play_game(message: types.Message):
     user_id = message.from_user.id
     user = await get_user_profile(user_id)
     if user:
-        # game_url = create_game_url(user_id, user['team_id'])
-        game_url = create_game_url()
+        game_url = f"http://127.0.0.1:5000?user_id={user_id}"
         await message.answer(f"Вы можете играть по [этой ссылке]({game_url})", parse_mode="Markdown")
     else:
         team_keyboard = create_team_keyboard()
         await message.answer("Вы еще не выбрали команду. Пожалуйста, выберите команду для игры:", reply_markup=team_keyboard)
-
 
 @dp.callback_query(F.data.startswith('team_'))
 async def cmd_team_selected(callback: types.CallbackQuery):
